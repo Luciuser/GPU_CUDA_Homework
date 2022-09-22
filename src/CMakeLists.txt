@@ -6,15 +6,17 @@ IF(MSVC)  # win32平台
     add_definitions(-D_ENABLE_EXTENDED_ALIGNED_STORAGE)
 endif()
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../extern/image)
+
 # 添加源文件
 set(main_SRC main.cpp)
 
-file(GLOB_RECURSE DrawJuliaSet "01_drawJuliaSet/*.h" "01_drawJuliaSet/*.cpp")	
+file(GLOB_RECURSE DrawJuliaSet "01_drawJuliaSet/*.h" "01_drawJuliaSet/*.cuh" "01_drawJuliaSet/*.cpp" "01_drawJuliaSet/*.cu")	
 file(GLOB_RECURSE DrawJuliaSetTest "01_drawJuliaSet_Test/*.cpp")	
-
+ 
 #源文件分组
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${main_SRC})
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${DrawJuliaSet})
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${DrawJuliaSetTest})
- 
-add_executable(DrawJuliaSet ${DrawJuliaSet} ${DrawJuliaSetTest})
+  
+add_executable(DrawJuliaSetExe ${DrawJuliaSet} ${DrawJuliaSetTest})
