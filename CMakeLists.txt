@@ -53,7 +53,7 @@ if(NOT WIN32)
   set(BoldGreen   "${Esc}[1;32m")
   set(BoldYellow  "${Esc}[1;33m")
   set(BoldBlue    "${Esc}[1;34m")
-endif()
+endif() 
 
 ################################################################################
 # 3rd party libraries

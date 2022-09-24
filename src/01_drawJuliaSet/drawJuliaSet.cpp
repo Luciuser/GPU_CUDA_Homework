@@ -62,7 +62,6 @@ void GPU_CUDA_L::DrawJuliaSet::draw()
 
 			double temp = julia(x, y);
 			
-
 			// map
 			double cut = 0.9993;
 			double mapCut = 0.005;
