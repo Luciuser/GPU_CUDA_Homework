@@ -28,7 +28,7 @@ link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../lib)
 # 添加源文件 
 set(main_SRC main.cpp)
 
-# 通用文件
+# 通用文件 
 file(GLOB_RECURSE Common_SRC "common/*.h" "common/*.cpp")
 
 # 课本上的通用文件
@@ -59,7 +59,7 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${DrawJuliaSetGPUTest})
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${RayTracingSimpleGPU})
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${RayTracingSimpleGPUTest})
 
-CUDA_ADD_EXECUTABLE(CUDATestExe ${CUDATest} ${Common_SRC})
+CUDA_ADD_EXECUTABLE(CUDATestExe ${CUDATest} ${Common_SRC}) 
 target_link_libraries (CUDATestExe cublas)
   
 CUDA_ADD_EXECUTABLE(DrawJuliaSetExe ${Common_SRC} ${DrawJuliaSet} ${DrawJuliaSetTest})
