@@ -10,8 +10,8 @@
 #define __draw_julia_set__
 
 #include<iostream>
-#include"complexNumber.h"
-#include"PNGManager.h"
+#include"..\Common\complexNumber.h"
+#include"..\Common\PNGManager.h"
 
 namespace GPU_CUDA_L {
 

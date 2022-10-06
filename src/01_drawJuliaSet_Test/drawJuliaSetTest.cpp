@@ -6,15 +6,15 @@
  * @Description: create the file
  */
 
+ /*
+  * @Date: 2022-10-06 15:02:42
+  * @Editor: Bingyang Jin
+  * @Description: delete GPU part
+  */
+
 #include <iostream>
 #include "../01_drawJuliaSet/drawJuliaSet.h"
-#include"../01_drawJuliaSet/PNGManager.h"
-
-//#define GPU_CALCULATE // 通过GPU进行计算
-
-#ifndef GPU_CALCULATE
-#define CPU_CALCULATE // 通过CPU进行计算
-#endif // !GPU_CALCULATE
+#include"../Common/PNGManager.h"
 
 int main() {
 	std::cout << "Begin" << std::endl;
@@ -33,7 +33,6 @@ int main() {
 	pngManager.writePNG("D://test.png");
 #endif // 0
 
-#ifdef CPU_CALCULATE
 	GPU_CUDA_L::DrawJuliaSet drawJuliaSet(1000);
 	drawJuliaSet.setIteration(150);
 	drawJuliaSet.setEnd(5000);
@@ -42,32 +41,6 @@ int main() {
 
 	COMMON_LFK::PNGManager PNGManager(1000, 1000, drawJuliaSet.getRGB());
 	PNGManager.writePNG("D://test.png");
-#endif // CPU_CALCULATE
-
-#ifdef GPU_CALCULATE
-	//GPU_CUDA_L::DrawJuliaSetGPU drawJuliaSet(1000);
-	//drawJuliaSet.setIteration(150);
-	//drawJuliaSet.setEnd(5000);
-
-	//drawJuliaSet.draw();
-
-	//COMMON_LFK::PNGManager PNGManager(1000, 1000, drawJuliaSet.getRGB());
-	//PNGManager.writePNG("D://test.png");
-
-	unsigned char *dev_map;
-	
-	cudaMalloc(
-		(void**)dev_map,
-		1000 * 1000 * 3 * sizeof(unsigned char)
-	);
-
-	dim3 grid(100, 100);
-
-	GPU_CUDA_L::kernel <<<grid, 1>>> (dev_map);
-
-
-#endif // GPU_CALCULATE
-
 
 	return 0;
 }
