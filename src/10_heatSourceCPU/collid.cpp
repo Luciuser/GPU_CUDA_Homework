@@ -93,6 +93,7 @@ void doPropogate()
 }
 
 extern void buildIt();
+extern "C" int doPropogateGPU();
 
 void doIt()
 {
@@ -120,7 +121,8 @@ void doIt()
 		}
 	}
 	else {
-		doPropogate();
+		//doPropogate();
+		doPropogateGPU();
 	}
 }
 

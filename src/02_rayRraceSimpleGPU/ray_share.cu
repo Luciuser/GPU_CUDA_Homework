@@ -25,7 +25,7 @@
 
 #define rnd( x ) (x * rand() / RAND_MAX)
 #define INF     2e10f
-5
+
 #define SPHERES 1
 
 struct Sphere {
