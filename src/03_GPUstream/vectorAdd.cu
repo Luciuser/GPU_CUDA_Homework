@@ -438,6 +438,8 @@ int singleStream()
 	//int numElements = 5000000;
 	//int numElements = 100000;
 
+	int myBlock = numElements / 20;
+
 	size_t size = numElements * sizeof(REAL);
 	//printf("\n", numElements);
 	//printf("###################\n");
@@ -474,7 +476,7 @@ int singleStream()
 	// 在GPU上创建内存
 	// Allocate the device input vector A
 	REAL* d_A = NULL;
-	err = cudaMalloc((void**)&d_A, size);
+	err = cudaMalloc((void**)&d_A, myBlock * sizeof(REAL));
 
 	if (err != cudaSuccess)
 	{
@@ -484,7 +486,7 @@ int singleStream()
 
 	// Allocate the device input vector B
 	REAL* d_B = NULL;
-	err = cudaMalloc((void**)&d_B, size);
+	err = cudaMalloc((void**)&d_B, myBlock * sizeof(REAL));
 
 	if (err != cudaSuccess)
 	{
@@ -494,7 +496,7 @@ int singleStream()
 
 	// Allocate the device output vector C
 	REAL* d_C = NULL;
-	err = cudaMalloc((void**)&d_C, size);
+	err = cudaMalloc((void**)&d_C, myBlock * sizeof(REAL));
 
 	if (err != cudaSuccess)
 	{
@@ -502,53 +504,55 @@ int singleStream()
 		exit(EXIT_FAILURE);
 	}
 
-	// 将 CPU 内的值拷贝到 GPU 中
-	// Copy the host input vectors A and B in host memory to the device input vectors in
-	// device memory
-	printf("Copy input data from the host memory to the CUDA device\n");
-	err = cudaMemcpyAsync(d_A, h_A, size, cudaMemcpyHostToDevice);
+	for (int o = 0; o < numElements; o += myBlock) {
+		// 将 CPU 内的值拷贝到 GPU 中
+		// Copy the host input vectors A and B in host memory to the device input vectors in
+		// device memory
+		printf("Copy input data from the host memory to the CUDA device\n");
+		err = cudaMemcpyAsync(d_A, h_A + o, myBlock * sizeof(REAL), cudaMemcpyHostToDevice);
 
-	if (err != cudaSuccess)
-	{
-		fprintf(stderr, "Failed to copy vector A from host to device (error code %s)!\n", cudaGetErrorString(err));
-		exit(EXIT_FAILURE);
-	}
+		if (err != cudaSuccess)
+		{
+			fprintf(stderr, "Failed to copy vector A from host to device (error code %s)!\n", cudaGetErrorString(err));
+			exit(EXIT_FAILURE);
+		}
 
-	err = cudaMemcpyAsync(d_B, h_B, size, cudaMemcpyHostToDevice);
+		err = cudaMemcpyAsync(d_B, h_B + o, myBlock * sizeof(REAL), cudaMemcpyHostToDevice);
 
-	if (err != cudaSuccess)
-	{
-		fprintf(stderr, "Failed to copy vector B from host to device (error code %s)!\n", cudaGetErrorString(err));
-		exit(EXIT_FAILURE);
-	}
+		if (err != cudaSuccess)
+		{
+			fprintf(stderr, "Failed to copy vector B from host to device (error code %s)!\n", cudaGetErrorString(err));
+			exit(EXIT_FAILURE);
+		}
 
-	// 进行 GPU 计算
-	// Launch the Vector Add CUDA Kernel
-	int threadsPerBlock = 1024;
-	int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock;
+		// 进行 GPU 计算
+		// Launch the Vector Add CUDA Kernel
+		int threadsPerBlock = 1024;
+		int blocksPerGrid = (myBlock + threadsPerBlock - 1) / threadsPerBlock;
 
-	printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid, threadsPerBlock);
-	vectorAdd << <blocksPerGrid, threadsPerBlock >> > (d_A, d_B, d_C, numElements);
+		printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid, threadsPerBlock);
+		vectorAdd << <blocksPerGrid, threadsPerBlock >> > (d_A, d_B, d_C, myBlock);
 
 
-	err = cudaGetLastError();
+		err = cudaGetLastError();
 
-	if (err != cudaSuccess)
-	{
-		fprintf(stderr, "Failed to launch vectorAdd kernel (error code %s)!\n", cudaGetErrorString(err));
-		exit(EXIT_FAILURE);
-	}
+		if (err != cudaSuccess)
+		{
+			fprintf(stderr, "Failed to launch vectorAdd kernel (error code %s)!\n", cudaGetErrorString(err));
+			exit(EXIT_FAILURE);
+		}
 
-	// 将 GPU 的结果拷贝回 CPU 中
-	// Copy the device result vector in device memory to the host result vector
-	// in host memory.
-	printf("Copy output data from the CUDA device to the host memory\n");
-	err = cudaMemcpyAsync(h_C, d_C, size, cudaMemcpyDeviceToHost);
+		// 将 GPU 的结果拷贝回 CPU 中
+		// Copy the device result vector in device memory to the host result vector
+		// in host memory.
+		printf("Copy output data from the CUDA device to the host memory\n");
+		err = cudaMemcpyAsync(h_C + o, d_C, myBlock * sizeof(REAL), cudaMemcpyDeviceToHost);
 
-	if (err != cudaSuccess)
-	{
-		fprintf(stderr, "Failed to copy vector C from device to host (error code %s)!\n", cudaGetErrorString(err));
-		exit(EXIT_FAILURE);
+		if (err != cudaSuccess)
+		{
+			fprintf(stderr, "Failed to copy vector C from device to host (error code %s)!\n", cudaGetErrorString(err));
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	printf("###################\n");
@@ -1270,7 +1274,7 @@ int twoStreamDepthNew()
 		// 进行 GPU 计算
 		// Launch the Vector Add CUDA Kernel
 		int threadsPerBlock = 1024;
-		int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock;
+		int blocksPerGrid = (myBlock + threadsPerBlock - 1) / threadsPerBlock;
 
 		printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid, threadsPerBlock);
 		vectorAdd << <blocksPerGrid, threadsPerBlock, 0, stream1 >> > (d_A0, d_B0, d_C0, myBlock);
@@ -1408,11 +1412,11 @@ int twoStreamWidthNew()
 	cudaError_t err = cudaSuccess;
 
 	// Print the vector length to be used, and compute its size
-	int numElements = 50000000;
+	//int numElements = 50000000;
 	//int numElements = 20000000;
 	//int numElements = 10000000;
 	//int numElements = 5000000;
-	//int numElements = 100000;
+	int numElements = 100000;
 
 	int myBlock = numElements / 20;
 
@@ -1420,7 +1424,7 @@ int twoStreamWidthNew()
 	//printf("\n", numElements);
 	//printf("###################\n");
 
-	printf("[Use TWO DEPTH stream: Vector addition of %d elements]\n", numElements);
+	printf("[Use TWO Width stream: Vector addition of %d elements]\n", numElements);
 
 	// 启动定时器
 	cudaEvent_t start, stop;
@@ -1527,14 +1531,6 @@ int twoStreamWidthNew()
 			exit(EXIT_FAILURE);
 		}
 
-		err = cudaMemcpyAsync(d_B0, h_B + o, myBlock * sizeof(REAL), cudaMemcpyHostToDevice, stream1);
-
-		if (err != cudaSuccess)
-		{
-			fprintf(stderr, "Failed to copy vector B from host to device (error code %s)!\n", cudaGetErrorString(err));
-			exit(EXIT_FAILURE);
-		}
-
 		// stream2
 		// 将 CPU 内的值拷贝到 GPU 中
 		err = cudaMemcpyAsync(d_A1, h_A + o + myBlock, myBlock * sizeof(REAL), cudaMemcpyHostToDevice, stream2);
@@ -1542,6 +1538,14 @@ int twoStreamWidthNew()
 		if (err != cudaSuccess)
 		{
 			fprintf(stderr, "Failed to copy vector A from host to device (error code %s)!\n", cudaGetErrorString(err));
+			exit(EXIT_FAILURE);
+		}
+
+		err = cudaMemcpyAsync(d_B0, h_B + o, myBlock * sizeof(REAL), cudaMemcpyHostToDevice, stream1);
+
+		if (err != cudaSuccess)
+		{
+			fprintf(stderr, "Failed to copy vector B from host to device (error code %s)!\n", cudaGetErrorString(err));
 			exit(EXIT_FAILURE);
 		}
 
@@ -1556,7 +1560,7 @@ int twoStreamWidthNew()
 		// 进行 GPU 计算
 		// Launch the Vector Add CUDA Kernel
 		int threadsPerBlock = 1024;
-		int blocksPerGrid = (numElements + threadsPerBlock - 1) / threadsPerBlock;
+		int blocksPerGrid = (myBlock + threadsPerBlock - 1) / threadsPerBlock;
 
 		printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid, threadsPerBlock);
 		vectorAdd << <blocksPerGrid, threadsPerBlock, 0, stream1 >> > (d_A0, d_B0, d_C0, myBlock);

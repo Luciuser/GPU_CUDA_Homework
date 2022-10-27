@@ -16,11 +16,13 @@ if(NOT DEFINED ${CMAKE_CUDA_ARCHITECTURES})
 endif()
 message(STATUS "CUDA architectures set to ${CMAKE_CUDA_ARCHITECTURES}")
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/common_teacher)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../extern/book/common)
 message(${CUDA_TOOLKIT_ROOT_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../extern/image)
 message(${CUDA_TOOLKIT_ROOT_DIR})
 include_directories(${CUDA_TOOLKIT_ROOT_DIR}/include)
+include_directories(${CUDA_TOOLKIT_ROOT_DIR}/include/cuda-samples-master/Common) 
 
 link_directories(${CUDA_TOOLKIT_ROOT_DIR}/lib/x64)
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/../lib)
@@ -33,6 +35,9 @@ file(GLOB_RECURSE Common_SRC "common/*.h" "common/*.cpp")
 
 # 课本上的通用文件
 file(GLOB_RECURSE CommonBook_SRC "common_book/*.h" "common_book/GL/*.h")
+
+# 老师的通用文件
+file(GLOB_RECURSE CommonTeacher_SRC "common_teacher/*.h" "common_teacher/*.hpp" "common_teacher/GL/*.h")
 
 # CUDA测试
 file(GLOB_RECURSE CUDATest "00_CUDA_Test/*.cpp")
@@ -47,10 +52,20 @@ file(GLOB_RECURSE DrawJuliaSetGPUTest "01_drawJuliaSetGPU_Test/*.cu" "01_drawJul
 file(GLOB_RECURSE RayTracingSimpleGPU "02_rayRraceSimpleGPU/*.h" "02_rayRraceSimpleGPU/*.cuh" "02_rayRraceSimpleGPU/*.cu")	
 file(GLOB_RECURSE RayTracingSimpleGPUTest "02_rayRraceSimpleGPU_Test/*.cpp")	
 
+# 第三次作业，Steam 测试
+file(GLOB_RECURSE SteamGPU "03_GPUstream/*.h" "03_GPUstream/*.cuh" "03_GPUstream/*.cu")	
+file(GLOB_RECURSE SteamGPUTest "03_GPUStream_Test/*.cpp")	
+
+# 大作业，热源扩散
+file(GLOB_RECURSE HeatSouceCPU "10_heatSourceCPU/*.h" "10_heatSourceCPU/*.hpp" "10_heatSourceCPU/*.cpp")	
+file(GLOB_RECURSE HeatSouceGPU "10_heatSourceGPU/*.h" "10_heatSourceGPU/*.cuh" "10_heatSourceGPU/*.cu")	
+file(GLOB_RECURSE HeatSouceGPUTest "10_heatSourceGPU_Test/*.cpp")	
+
 #源文件分组 
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${main_SRC}) 
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${Common_SRC})
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${CommonBook_SRC})
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${CommonTeacher_SRC})
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${CUDATest})
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${DrawJuliaSet})
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${DrawJuliaSetTest})
@@ -58,6 +73,11 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${DrawJuliaSetGPU})
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${DrawJuliaSetGPUTest}) 
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${RayTracingSimpleGPU})
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${RayTracingSimpleGPUTest})
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SteamGPU})
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SteamGPUTest})
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${HeatSouceCPU})
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${HeatSouceGPU})
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${HeatSouceGPUTest})
 
 CUDA_ADD_EXECUTABLE(CUDATestExe ${CUDATest} ${Common_SRC}) 
 target_link_libraries (CUDATestExe cublas)
@@ -71,3 +91,10 @@ target_link_libraries (DrawJuliaSetGPUExe cublas)
 CUDA_ADD_EXECUTABLE(RayTracingSimpleGPUExe ${Common_SRC} ${CommonBook_SRC} ${RayTracingSimpleGPU} ${RayTracingSimpleGPUTest})
 target_link_libraries (RayTracingSimpleGPUExe cublas)
 #target_link_libraries (RayTracingSimpleGPUExe glut64)
+
+CUDA_ADD_EXECUTABLE(SteamGPUExe ${Common_SRC} ${CommonBook_SRC} ${SteamGPU} ${SteamGPUTest})
+target_link_libraries (SteamGPUExe cublas)
+
+CUDA_ADD_EXECUTABLE(HeatSourceExe ${Common_SRC} ${CommonTeacher_SRC} ${HeatSouceCPU} ${HeatSouceGPU} ${HeatSouceGPUTest})
+target_link_libraries (HeatSourceExe cublas) 
+target_link_libraries (HeatSourceExe glut64)
