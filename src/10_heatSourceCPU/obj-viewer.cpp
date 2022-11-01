@@ -320,7 +320,7 @@ void usage_self_cd()
 }
 
 //FEM
-int drawWithCPU(int argc, char **argv)
+int drawWithGLUT(int argc, char **argv)
 {
 	if (argc < 2) {
 		printf("usage: %s input.obj\n", argv[0]);

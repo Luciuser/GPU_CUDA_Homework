@@ -144,7 +144,6 @@ void doPropogate()
 
 extern void buildIt();
 extern "C" int doPropogateGPU();
-extern "C" int doPropogateGPU_New();
 
 void doIt()
 {
@@ -156,7 +155,6 @@ void doIt()
 
 		// 第一次执行
 		currentPass = 0;
-		buildIt();
 
 		gSources.push_back(100);
 		gSources.push_back(10);
@@ -174,13 +172,9 @@ void doIt()
 		for (int i = 0; i < gSources.size(); i++) {
 			gIntensity[currentPass][gSources[i]] = 1.0;
 		}
-		//readyGPUdata();
 	}
 	else {
-		//doPropogate();
-		//doPropogateGPU();
-		doPropogateGPU_New();
-		//doPropogateGPUConstant();
+		doPropogateGPU();
 	}
 }
 

@@ -8,15 +8,13 @@
 
 #include<iostream>
 
-//extern "C" int drawWithCPU(int argc, char** argv);
-extern int drawWithCPU(int argc, char** argv);
-
+extern int drawWithGLUT(int argc, char** argv);
 
 int main(int argc, char** argv) {
 	
 	std::cout << "Begin" << std::endl;
 
-	drawWithCPU(argc, argv);
+	drawWithGLUT(argc, argv);
 
 	std::cout << "Finish" << std::endl;
 
