@@ -54,12 +54,11 @@ __global__ void heatCalculate(TriangleAdjoin* d, int numElements)
 			__syncthreads();
 
 			d[i].intensity = out;
-			
-			__syncthreads();
-
 			if (d[i].isConstant) {
 				d[i].intensity = 1;
 			}
+
+			__syncthreads();
 		}
 	}
 };

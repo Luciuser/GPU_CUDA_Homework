@@ -115,34 +115,34 @@ void buildAdjoinTriangles() {
 	}
 }
 
-void doPropogate()
-{
-	int prevPass = currentPass;
-	currentPass = 1 - currentPass;
+//void doPropogate()
+//{
+//	int prevPass = currentPass;
+//	currentPass = 1 - currentPass;
+//
+//	mesh *mc = cloths[0];
+//	int num = mc->getNbFaces();
+//
+//	TIMING_BEGIN
+//		for (int i = 0; i < num; i++) {
+//			std::vector<int> &adjs = gAdjInfo[i];
+//			// printf("adjs size is: %d", adjs.size());
+//			gIntensity[currentPass][i] = gIntensity[prevPass][i];
+//			for (int j = 0; j < adjs.size(); j++) {
+//				int tj = adjs[j];
+//				gIntensity[currentPass][i] += gIntensity[prevPass][tj];
+//			}
+//
+//			gIntensity[currentPass][i] /= REAL(adjs.size() + 1);
+//		}
+//
+//	for (int i = 0; i < gSources.size(); i++) {
+//		gIntensity[currentPass][gSources[i]] = 1.0;
+//	}
+//	TIMING_END("propogating...")
+//}
 
-	mesh *mc = cloths[0];
-	int num = mc->getNbFaces();
-
-	TIMING_BEGIN
-		for (int i = 0; i < num; i++) {
-			std::vector<int> &adjs = gAdjInfo[i];
-			// printf("adjs size is: %d", adjs.size());
-			gIntensity[currentPass][i] = gIntensity[prevPass][i];
-			for (int j = 0; j < adjs.size(); j++) {
-				int tj = adjs[j];
-				gIntensity[currentPass][i] += gIntensity[prevPass][tj];
-			}
-
-			gIntensity[currentPass][i] /= REAL(adjs.size() + 1);
-		}
-
-	for (int i = 0; i < gSources.size(); i++) {
-		gIntensity[currentPass][gSources[i]] = 1.0;
-	}
-	TIMING_END("propogating...")
-}
-
-extern void buildIt();
+//extern void buildIt();
 extern "C" int doPropogateGPU();
 
 void doIt()
